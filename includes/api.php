@@ -4,10 +4,10 @@
     {
         public function __construct()
         {
-            $this->prefix   = NGWooMoeDeloOrg::prefix();
-            $this->version  = NGWooMoeDeloOrg::version();
+            $this->prefix   = NGWMD::prefix();
+            $this->version  = NGWMD::version();
             $this->host     = 'https://restapi.moedelo.org';
-            $this->settings = NGWooMoeDeloOrg::settings();
+            $this->settings = NGWMD::settings();
         }
         
         public function isCompany($inn)

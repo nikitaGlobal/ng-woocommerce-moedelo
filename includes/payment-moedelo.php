@@ -5,9 +5,9 @@
         function __construct()
         {
             
-            $this->id      = NGWooMoeDeloOrg::prefix();
+            $this->id      = NGWMD::prefix();
             $this->prefix  = $this->id;
-            $this->version = NGWooMoeDeloOrg::version();
+            $this->version = NGWMD::version();
             //$this->icon='';
             $this->has_fields         = true;
             $this->method_title       = __('Moedelo.org', $this->prefix);
@@ -109,13 +109,13 @@
             //$fields=WC()->session->get($this->prefix);
             
             $bill=array(
-                'KontragentId'=>NGWOOMoeDeloOrg::getCompanyByINN((int)$_POST[$this->prefix.'inn']),
+                'KontragentId'=>NGWMD::getCompanyByINN((int)$_POST[$this->prefix.'inn']),
                 'AdditionalInfo'=>__('Order #',$this->prefix).$orderId,
                 'Sum'=>$order->get_total(),
                 'Type'=>1,//@Todo сделать вариант счета
                 'items'=>$this->_orderItems($order)
             );
-            NGWOOMoeDeloOrg::postBill($bill);
+            NGWMD::postBill($bill);
         }
         
         private function _orderItems($order) {
@@ -158,7 +158,7 @@
         
         private function _validateFieldINN($field)
         {
-            if (!NGWOOMoeDeloOrg::isCompany($field['value'])) {
+            if (!NGWMD::isCompany($field['value'])) {
                 wc_add_notice(__('Please recheck INN', $this->prefix),'error', array('id'=>$this->prefix.$field['name']));
                 return false;
             }

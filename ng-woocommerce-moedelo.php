@@ -6,7 +6,7 @@
      * Description: Integrates WooCommerce and moedelo.org
      * Author: Nikita Menshutin
      * Version: 1.0
-     * Text Domain: NGWooMoeDeloOrg
+     * Text Domain: NGWMD
      * Domain Path: languages
      *
      * PHP version 7.2
@@ -18,7 +18,7 @@
      * @link     https://nikita.global
      * */
     defined('ABSPATH') or die("No script kiddies please!");
-if (! class_exists("NGWooMoeDeloOrg")) {
+if (! class_exists("NGWMD")) {
     /**
          * Our main class goes here
          *
@@ -28,7 +28,7 @@ if (! class_exists("NGWooMoeDeloOrg")) {
          * @license  http://opensource.org/licenses/gpl-license.php GNU Public License
          * @link     https://nikita.global
          */
-    Class NGWOOMoeDeloOrg
+    Class NGWMD
     {
             
         /**
@@ -427,4 +427,4 @@ if (! class_exists("NGWooMoeDeloOrg")) {
         }
     }
 }
-    new NGWooMoeDeloOrg();
+    new NGWMD();

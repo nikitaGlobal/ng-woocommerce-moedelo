@@ -11,7 +11,8 @@
             //$this->icon='';
             $this->has_fields         = true;
             $this->method_title       = __('Moedelo.org', $this->prefix);
-            $this->method_description = __('Invoicing via https://moedelo.org', $this->prefix);
+            $this->method_description = __('Invoicing via https://moedelo.org',
+                $this->prefix);
             $this->supports           = array(
                 'products'
             );
@@ -45,40 +46,41 @@
         public function init_form_fields()
         {
             $this->form_fields = array(
-                'enabled'     => array(
+                'enabled'              => array(
                     'title'   => __('Enable/Disable', 'woocommerce'),
                     'type'    => 'checkbox',
                     'label'   => __('Enable Cheque Payment', 'woocommerce'),
                     'default' => 'no'
                 ),
-                'title'       => array(
+                'title'                => array(
                     'title'       => __('Title', 'woocommerce'),
                     'type'        => 'text',
-                    'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
+                    'description' => __('This controls the title which the user sees during checkout.',
+                        'woocommerce'),
                     'default'     => __('Invoice for bank transfer', $this->prefix),
                     'desc_tip'    => true,
                 ),
-                'description' => array(
+                'description'          => array(
                     'title'   => __('Customer Message', 'woocommerce'),
                     'type'    => 'textarea',
                     'default' => ''
                 ),
-                'defaultProductTypeIs'=>array(
-                    'title'=>__('Default item type is', $this->prefix),
-                    'type'=>'select',
-                    'options'=>array(
-                        '1'=>'product',
-                        '2'=>'service'
+                'defaultProductTypeIs' => array(
+                    'title'   => __('Default item type is', $this->prefix),
+                    'type'    => 'select',
+                    'options' => array(
+                        '1' => 'product',
+                        '2' => 'service'
                     ),
-                    'default'=>1
+                    'default' => 1
                 ),
-                'checkCovered'=>array(
-                    'title'=>__('Check if bill is covered', $this->prefix),
-                    'description'=>__('Will check every 5 minutes via moedelo API if bill is covered'),
-                    'type'=>'checkbox',
-                    'default'=>'no'
+                'checkCovered'         => array(
+                    'title'       => __('Check if bill is covered', $this->prefix),
+                    'description' => __('Will check every 5 minutes via moedelo API if bill is covered'),
+                    'type'        => 'checkbox',
+                    'default'     => 'no'
                 ),
-                'apikey'      => array(
+                'apikey'               => array(
                     'title'       => __('moedelo.org api key'),
                     'type'        => 'text',
                     'description' => __('Can be found in moedelo.org dashboard -> partners\' integration')
@@ -103,37 +105,57 @@
             do_action('woocommerce_credit_card_form_end', $this->id);
             echo '<div class="clear"></div></fieldset>';
         }
-    
-        public function process_payment( $orderId ) {
-            $order=wc_get_order($orderId);
+        
+        public function process_payment($orderId)
+        {
+            $order = wc_get_order($orderId);
             //$fields=WC()->session->get($this->prefix);
             
-            $bill=array(
-                'KontragentId'=>NGWMD::getCompanyByINN((int)$_POST[$this->prefix.'inn']),
-                'AdditionalInfo'=>__('Order #',$this->prefix).$orderId,
-                'Sum'=>$order->get_total(),
-                'Type'=>1,//@Todo сделать вариант счета
-                'items'=>$this->_orderItems($order)
+            $bill = array(
+                'KontragentId'   => NGWMD::getCompanyByINN((int)$_POST[$this->prefix . 'inn']),
+                'AdditionalInfo' => __('Order #', $this->prefix) . $orderId,
+                'Sum'            => $order->get_total(),
+                'Type'           => 1,//@Todo сделать вариант счета
+                'items'          => $this->_orderItems($order)
             );
-            NGWMD::postBill($bill);
+            // NGWMD::log($bill);
+            $bill = NGWMD::postBill($bill);
+            NGWMD::log($bill);
+            NGWMD::log('true');
+            if ( ! isset($bill['Number']) || ! isset($bill['Online'])) {
+                return;
+            }
+            $order->payment_complete();
+            $order->add_order_note(__('Bill id', $this->prefix) . ' '.$bill['Number'],true);
+            $order->add_order_note(__('Available here :', $this->prefix) . ' '.'https://moedelo.org/'.$bill['Online']);
+            return array(
+                'result'   => 'success',
+                'redirect' => $this->get_return_url($order)
+            );
         }
         
-        private function _orderItems($order) {
-            $items=array();
-            $order_items = $order->get_items( array('line_item', 'fee', 'shipping') );
-            foreach( $order_items as $item_id => $order_item ) {
-                $items[]=array(
-                    'Name'=>$order_item->get_name(),
-                    'Type'=>(string)$this->_orderItemType(new WC_Order_Item_Product($item_id)),
-                    'Count'=>$order_item->get_quantity(),
-                    'Price'=>$order_item->get_total(),
-                    'Unit'=>'шт.'
+        private function _orderItems($order)
+        {
+            $items       = array();
+            $order_items = $order->get_items(array('line_item', 'fee', 'shipping'));
+            foreach ($order_items as $item_id => $order_item) {
+                $items[] = array(
+                    'Name'  => $order_item->get_name(),
+                    'Type'  => (string)$this->_orderItemType(new WC_Order_Item_Product($item_id)),
+                    'Count' => $order_item->get_quantity(),
+                    'Price' => $order_item->get_total()/$order_item->get_quantity(),
+                    'Unit'  => 'шт.'
                 );
             }
+            
             return $items;
         }
         
-        private function _orderItemType($product){
+        private function _orderItemType($product)
+        {
+            NGWMD::log($product);
+            NGWMD::log($product->get_id());
+            
             return 1;
         }
         
@@ -143,34 +165,42 @@
                 if (isset($field['required']) && $field['required'] && empty($_POST[$this->prefix . $field['name']])) {
                     $field_name = __($field['label'], $this->prefix);
                     $field_key  = $this->prefix . $field['name'];
-                    wc_add_notice(sprintf(__('%s is a required field.', 'woocommerce'),
-                        '<strong>' . esc_html($field_name) . '</strong>'), 'error', array('id' => $field_key));
+                    wc_add_notice(sprintf(__('%s is a required field.',
+                        'woocommerce'),
+                        '<strong>' . esc_html($field_name) . '</strong>'), 'error',
+                        array('id' => $field_key));
                     continue;
                 }
                 $method = '_validateField' . $field['name'];
                 if ( ! method_exists($this, $method)) {
                     continue;
                 }
+                
                 return $this->{$method}($field);
             }
+            NGWMD::log('true');
+            
             return true;
         }
         
         private function _validateFieldINN($field)
         {
-            if (!NGWMD::isCompany($field['value'])) {
-                wc_add_notice(__('Please recheck INN', $this->prefix),'error', array('id'=>$this->prefix.$field['name']));
+            NGWMD::log($field);
+            if ( ! NGWMD::isCompany($field['value'])) {
+                wc_add_notice(__('Please recheck INN', $this->prefix), 'error',
+                    array('id' => $this->prefix . $field['name']));
+                
                 return false;
             }
+            NGWMD::log('true');
+            
             return true;
         }
         
         private function _prefillValues()
         {
-            if (!class_exists('WC')) {
-                return;
-            }
-            if (!is_callable(WC()->session->set())) {
+            if ( ! isset($_POST['payment_method']) ||
+                 ($_POST['payment_method'] != $this->prefix)) {
                 return;
             }
             foreach ($this->frontEndFields as $key => $field) {

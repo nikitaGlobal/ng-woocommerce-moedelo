@@ -12,11 +12,13 @@
         
         public function isCompany($inn)
         {
+            NGWMD::log($inn);
             $res = $this->get(
                 array(
                     '/kontragents/api/v1/kontragent',
                     array('inn' => (int)$inn[0])
                 ));
+            NGWMD::log($res);
             if ($res && isset($res[0]['Form']) && in_array($res[0]['Form'], array(1, 2))) {
                 return true;
             }
@@ -47,13 +49,13 @@
                 'items'=>false
             );
             $bill=array_merge($billDefaults,$bill[0]);
-            error_log(print_r($bill,true));
+            NGWMD::log($bill);
             $res=$this->post(array('/accounting/api/v1/sales/bill', $bill));
-            error_log(print_r($res,true));
+            NGWMD::log($res);
+            return $res;
         }
         
-        public
-        function post(
+        public function post(
             $args
         ) {
             $args                    = self::_prepareArgs($args);
@@ -69,11 +71,12 @@
                 $req
             );
             if (isset($res['ValidationErrors']) || is_wp_error($res)) {
-                error_log('post error');
-                error_log(print_r($res,true));
+                NGWMD::log('post error');
+                NGWMD::log($res,true);
                 return false;
             }
             $result = json_decode(wp_remote_retrieve_body($res), true);
+            NGWMD::log($result);
             return $result;
         }
         
@@ -81,6 +84,7 @@
         function get(
             $args
         ) {
+            NGWMD::log($args);
             $args = self::_prepareArgs($args);
             $host = add_query_arg($args[1], $this->host . $args[0]);
             $res  = wp_remote_request($host,
@@ -93,6 +97,7 @@
                 return false;
             }
             $res = json_decode(wp_remote_retrieve_body($res), true);
+            NGWMD::log($res);
             if ( ! isset($res['ResourceList'])) {
                 return false;
             }

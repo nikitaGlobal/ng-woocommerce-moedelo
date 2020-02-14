@@ -425,6 +425,28 @@ if (! class_exists("NGWMD")) {
                 FILE_APPEND
             );
         }
+    
+    
+        /**
+         * Для логов - часть вывода к
+         * ласса и метода/функции
+         *
+         * @param object $debug debug_backtrace
+         *
+         * @return string
+         */
+        private static function _logString($debug)
+        {
+            $out = implode(
+                '', array(
+                    $debug['class'],
+                    $debug['type'],
+                    $debug['function']
+                )
+            );
+        
+            return $out;
+        }
     }
 }
     new NGWMD();

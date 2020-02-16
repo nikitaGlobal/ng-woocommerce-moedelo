@@ -46,13 +46,13 @@
         public function init_form_fields()
         {
             $this->form_fields = array(
-                'enabled'              => array(
+                'enabled'             => array(
                     'title'   => __('Enable/Disable', 'woocommerce'),
                     'type'    => 'checkbox',
                     'label'   => __('Enable Cheque Payment', 'woocommerce'),
                     'default' => 'no'
                 ),
-                'title'                => array(
+                'title'               => array(
                     'title'       => __('Title', 'woocommerce'),
                     'type'        => 'text',
                     'description' => __('This controls the title which the user sees during checkout.',
@@ -60,12 +60,22 @@
                     'default'     => __('Invoice for bank transfer', $this->prefix),
                     'desc_tip'    => true,
                 ),
-                'description'          => array(
+                'description'         => array(
                     'title'   => __('Customer Message', 'woocommerce'),
                     'type'    => 'textarea',
                     'default' => ''
                 ),
-                'defaultProductTypeIs' => array(
+                'invoiceUnpaid'           => array(
+                    'title'=>__('Order status after bill is issued'),
+                    'type'=>'select',
+                    'options'=>$this->_getOrderStatuses()
+                ),
+                'invoicePaid'           => array(
+                    'title'=>__('Order status after bill is paid'),
+                    'type'=>'select',
+                    'options'=>$this->_getOrderStatuses()
+                ),
+                'defaultProducttype'  => array(
                     'title'   => __('Default item type is', $this->prefix),
                     'type'    => 'select',
                     'options' => array(
@@ -74,13 +84,18 @@
                     ),
                     'default' => 1
                 ),
-                'checkCovered'         => array(
+                'defaultProductunits' => array(
+                    'title'   => __('Default item units are', $this->prefix),
+                    'type'    => 'text',
+                    'default' => 'pcs'
+                ),
+                'checkCovered'        => array(
                     'title'       => __('Check if bill is covered', $this->prefix),
                     'description' => __('Will check every 5 minutes via moedelo API if bill is covered'),
                     'type'        => 'checkbox',
                     'default'     => 'no'
                 ),
-                'apikey'               => array(
+                'apikey'              => array(
                     'title'       => __('moedelo.org api key'),
                     'type'        => 'text',
                     'description' => __('Can be found in moedelo.org dashboard -> partners\' integration')
@@ -126,8 +141,14 @@
                 return;
             }
             $order->payment_complete();
-            $order->add_order_note(__('Bill id', $this->prefix) . ' '.$bill['Number'],true);
-            $order->add_order_note(__('Available here :', $this->prefix) . ' '.'https://moedelo.org/'.$bill['Online']);
+            WC()->cart->empty_cart();
+            update_post_meta($orderId, $this->prefix . 'bill', $bill['Number']);
+            update_post_meta($orderId, $this->prefix, $bill);
+            $order->add_order_note(__('Bill id',
+                    $this->prefix) . ' ' . $bill['Number'], true);
+            $order->add_order_note(__('Available here :',
+                    $this->prefix) . ' ' . 'https://moedelo.org/' . $bill['Online']);
+            $order->update_status($this->get_option('invoiceUnpaid'));
             return array(
                 'result'   => 'success',
                 'redirect' => $this->get_return_url($order)
@@ -141,22 +162,28 @@
             foreach ($order_items as $item_id => $order_item) {
                 $items[] = array(
                     'Name'  => $order_item->get_name(),
-                    'Type'  => (string)$this->_orderItemType(new WC_Order_Item_Product($item_id)),
+                    'Type'  => (string)$this->_orderItemgetValue(new
+                    WC_Order_Item_Product($item_id), 'type'),
                     'Count' => $order_item->get_quantity(),
-                    'Price' => $order_item->get_total()/$order_item->get_quantity(),
-                    'Unit'  => 'шт.'
+                    'Price' => $order_item->get_total() / $order_item->get_quantity(),
+                    'Unit'  => (string)$this->_orderItemgetValue(new
+                    WC_Order_Item_Product($item_id), 'units')
                 );
             }
             
             return $items;
         }
         
-        private function _orderItemType($product)
+        private function _orderItemgetValue($product, $fieldid)
         {
-            NGWMD::log($product);
-            NGWMD::log($product->get_id());
-            
-            return 1;
+            $productid = $product->get_product_id();
+            NGWMD::log(array($productid, $fieldid));
+            $value = get_post_meta($productid, $this->prefix . $fieldid, true);
+            NGWMD::log($value);
+            if ( ! $value) {
+                return $this->get_option('defaultProduct' . $fieldid);
+            }
+            return $value;
         }
         
         public function validate_fields()
@@ -181,6 +208,15 @@
             NGWMD::log('true');
             
             return true;
+        }
+        
+        private function _getOrderStatuses(){
+            $statuses=array();
+            foreach (wc_get_order_statuses() as $k=>$v)
+            {
+                $statuses[str_replace('wc_','',$k)]=$v;
+            }
+            return $statuses;
         }
         
         private function _validateFieldINN($field)

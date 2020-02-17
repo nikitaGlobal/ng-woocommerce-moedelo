@@ -205,9 +205,16 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         );
         $order->add_order_note(
             __(
-                'Available here :',
+                'Invoice is available here :',
                 $this->prefix
             ) . ' ' . 'https://moedelo.org/' . $bill['Online']
+        );
+        $order->set_customer_note(
+            __(
+                'Invoice is available here :',
+                $this->prefix
+            ) . ' <a target="_blank" href="' . 'https://moedelo.org/' . $bill['Online'].'">moedelo.org'.
+            '</a>'
         );
         $order->update_status($this->get_option('invoiceUnpaid'));
             

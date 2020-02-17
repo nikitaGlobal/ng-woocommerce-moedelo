@@ -260,18 +260,16 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
     private function _orderItemGetValue($product, $fieldid)
     {
         $productid = $product->get_product_id();
-        NGWMD::log(array($productid, $fieldid));
-        $value = get_post_meta(
-            $productid,
-            $this->prefix . $fieldid,
-            true
-        );
-        NGWMD::log($value);
-        if (! $value) {
-            return $this->get_option('defaultProduct' . $fieldid);
-        }
+                $value = get_post_meta(
+                    $productid,
+                    $this->prefix . $fieldid,
+                    true
+                );
+                if (! $value) {
+                    return $this->get_option('defaultProduct' . $fieldid);
+                }
             
-        return $value;
+                return $value;
     }
     
     /**
@@ -308,8 +306,6 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
                 
             return $this->{$method}($field);
         }
-        NGWMD::log('true');
-            
         return true;
     }
     
@@ -339,7 +335,6 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
      */
     private function _validateFieldINN($field)
     {
-        NGWMD::log($field);
         if (! NGWMD::isCompany($field['value'])) {
             wc_add_notice(
                 __('Please recheck INN', $this->prefix), 'error',
@@ -348,8 +343,6 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
                 
             return false;
         }
-        NGWMD::log('true');
-            
         return true;
     }
     

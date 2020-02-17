@@ -107,9 +107,7 @@ Class Ngmoedeloapi
             'items'=>false
         );
         $bill=array_merge($billDefaults, $bill[0]);
-        NGWMD::log($bill);
         $res=$this->post(array('/accounting/api/v1/sales/bill', $bill));
-        NGWMD::log($res);
         return $res;
     }
     
@@ -136,12 +134,9 @@ Class Ngmoedeloapi
             $req
         );
         if (isset($res['ValidationErrors']) || is_wp_error($res)) {
-            NGWMD::log('post error');
-            NGWMD::log($res, true);
             return false;
         }
         $result = json_decode(wp_remote_retrieve_body($res), true);
-        NGWMD::log($result);
         return $result;
     }
     
@@ -154,7 +149,6 @@ Class Ngmoedeloapi
      */
     public function get($args) 
     {
-        NGWMD::log($args);
         $args = self::_prepareArgs($args);
         $host = add_query_arg($args[1], $this->host . $args[0]);
         $res  = wp_remote_request(
@@ -168,7 +162,6 @@ Class Ngmoedeloapi
             return false;
         }
         $res = json_decode(wp_remote_retrieve_body($res), true);
-        NGWMD::log($res);
         if (isset($res['Id'])) {
             return $res;
         }

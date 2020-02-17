@@ -619,7 +619,6 @@ if (! class_exists("NGWMD")) {
         private function _trackPayment($order) 
         {
             $trans=$this->prefix.crc32(serialize($order));
-            self::log($this->settings);
             if (get_transient($trans)) {
                 return;
             }
@@ -638,52 +637,7 @@ if (! class_exists("NGWMD")) {
             }
             set_transient($trans, true, 60*5);
         }
-        
-        /**
-             * Пишем в логи полученные значения,
-             * если режим отладки
-             *
-             * @param any    $value  значение
-             * @param string $prefix разделитель значений
-             *
-             * @return void
-             */
-        public static function log($value, $prefix = '')
-        {
-            if ($prefix != '') {
-                $prefix .= '-';
-            }
-            if (! defined('WP_DEBUG') || ! WP_DEBUG) {
-                return;
-            }
-            ob_start();
-            $debug = debug_backtrace();
-            echo "\n";
-            echo date('Y-m-d H:i:s ');
-            echo "\n";
-            //      echo(json_encode($debug[1]));
-            echo self::_logString($debug[1]);
-            echo "\n";
-            if (is_object($value)|| is_array($value)) {
-                print_r($value);
-            } else {
-                var_dump($value);
-            }
-            $string = ob_get_clean();
-            file_put_contents(
-                dirname(__FILE__) . '/logs/' . $prefix . date('Y-m-d') . '.log',
-                $string,
-                FILE_APPEND
-            );
-            file_put_contents(
-                dirname(__FILE__) . '/logs/' . $debug[1]['function'] . '-' .
-                date('Y-m-d') . '.log',
-                $string,
-                FILE_APPEND
-            );
-        }
-    
-    
+   
         /**
          * Для логов - часть вывода к
          * ласса и метода/функции

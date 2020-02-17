@@ -1,7 +1,21 @@
 <?php
     
+/**
+* Class Ngmoedeloapi
+ *
+ * PHP version 7.2
+ *
+ * @category NikitaGlobal
+ * @package  NikitaGlobal
+ * @author   Nikita Menshutin <nikita@nikita.global>
+ * @license  https://nikita.global commercial
+ * @link     https://nikita.global
+*/
 Class Ngmoedeloapi
 {
+    /**
+     * Ngmoedeloapi constructor.
+     */
     public function __construct()
     {
         $this->prefix   = NGWMD::prefix();
@@ -9,18 +23,30 @@ Class Ngmoedeloapi
         $this->host     = 'https://restapi.moedelo.org';
         $this->settings = NGWMD::settings();
     }
-        
+    
+    /**
+     * Это компания?
+     * Находим через moedelo.org
+     * контрагента.
+     * Если нет, создаем
+     * и повторяем
+     * Если ИНН неверный
+     * или принадлежит физ.лицу,
+     * выдаем соответствующую ошибку
+     *
+     * @param int $inn ИНН
+     *
+     * @return bool
+     */
     public function isCompany($inn)
     {
-        NGWMD::log($inn);
         $res = $this->get(
             array(
                 '/kontragents/api/v1/kontragent',
                 array('inn' => (int)$inn[0])
             )
         );
-            NGWMD::log($res);
-        if ($res 
+        if ($res
             && isset($res[0]['Form'])
             && in_array(
                 $res[0]['Form'], array(1, 2)
@@ -44,7 +70,18 @@ Class Ngmoedeloapi
             }
             return false;
     }
-        
+    
+    /**
+     * Получить ID Контрагента
+     * по ИНН.
+     * Предполагается, что Контрагент
+     * уже заведен в базе moedelo,
+     * например, во время проверки
+     *
+     * @param int $inn ИНН
+     *
+     * @return int
+     */
     public function getCompanyByINN($inn)
     {
         $res = $this->get(
@@ -55,7 +92,14 @@ Class Ngmoedeloapi
         );
             return (int)$res[0]['Id'];
     }
-        
+    
+    /**
+     * Создать счет
+     *
+     * @param array $bill счет
+     *
+     * @return array данные созданного счета
+     */
     public function postBill($bill)
     {
         $billDefaults=array(
@@ -68,10 +112,16 @@ Class Ngmoedeloapi
         NGWMD::log($res);
         return $res;
     }
-        
-    public function post(
-        $args
-    ) {
+    
+    /**
+     * Метод POST
+     *
+     * @param array $args аргументы
+     *
+     * @return bool|array
+     */
+    public function post($args) 
+    {
         $args                    = self::_prepareArgs($args);
         $host                    = $this->host . $args[0];
         $headers                 = $this->_prepareHeaders();
@@ -94,10 +144,16 @@ Class Ngmoedeloapi
         NGWMD::log($result);
         return $result;
     }
-        
-    public function get(
-        $args
-    ) {
+    
+    /**
+     * Метод GET
+     *
+     * @param array $args аргументы
+     *
+     * @return bool|array
+     */
+    public function get($args) 
+    {
         NGWMD::log($args);
         $args = self::_prepareArgs($args);
         $host = add_query_arg($args[1], $this->host . $args[0]);
@@ -125,7 +181,13 @@ Class Ngmoedeloapi
             
         return $res['ResourceList'];
     }
-        
+    
+    /**
+     * Подготовка заголовков
+     * запроса
+     *
+     * @return array
+     */
     private function _prepareHeaders()
     {
         return array(
@@ -133,7 +195,14 @@ Class Ngmoedeloapi
             'md-api-key' => $this->settings['apikey']
         );
     }
-        
+    
+    /**
+     * Подготовка аргументов
+     *
+     * @param array $args что нам дали
+     *
+     * @return array
+     */
     private static function _prepareArgs(
         $args
     ) {

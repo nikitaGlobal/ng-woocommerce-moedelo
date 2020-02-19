@@ -62,7 +62,7 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
                 'disabled' => true
             )*/
         );
-        $this->_prefillValues();
+
     }
     
     /**
@@ -186,12 +186,12 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
     {
         $order = wc_get_order($orderId);
         //$fields=WC()->session->get($this->prefix);
-            
+        $inn= (int)$_POST[
+        $this->prefix . 'inn'
+        ];
         $bill = array(
         'KontragentId'   => NGWMD::getCompanyByINN(
-            (int)$_POST[
-            $this->prefix . 'inn'
-            ]
+            $inn
         ),
         'AdditionalInfo' => __('Order #', $this->prefix) . $orderId,
         'Sum'            => $order->get_total(),
@@ -207,6 +207,7 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         WC()->cart->empty_cart();
         update_post_meta($orderId, $this->prefix . 'bill', $bill['Number']);
         update_post_meta($orderId, $this->prefix, $bill);
+        $this->_assignINNToUser($inn);
         $order->add_order_note(
             __(
                 'Bill id',
@@ -283,7 +284,8 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
                     'Count' => $order_item->get_quantity(),
                     'Price' => round(
                         $order_item->get_total() /
-                        $order_item->get_quantity(), (int)get_option('woocommerce_price_num_decimals')
+                        $order_item->get_quantity(),
+                        (int)get_option('woocommerce_price_num_decimals')
                     ),
                     'Unit'  => (string)$this->_orderItemGetValue(
                         new
@@ -391,6 +393,9 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
                 continue;
             }
             $method = '_validateField' . $field['name'];
+            if (isset($_POST[$this->prefix.$field['name']])) {
+                $field['value'] =$_POST[$this->prefix.$field['name']];
+            }
             if (! method_exists($this, $method)) {
                 continue;
             }
@@ -448,19 +453,32 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         if (! isset($_POST['payment_method'])
             || ($_POST['payment_method'] != $this->prefix)
         ) {
-            return;
+            //     return;
         }
         foreach ($this->frontEndFields as $key => $field) {
-            $method = '_prefillValue' . $field['name'];
+            //  $method = '_prefillValue' . $field['name'];
             if (isset($_POST[$this->prefix . $field['name']])) {
                 $this->frontEndFields[$key]['value'] = $_POST[$this->prefix .
                                                               $field['name']];
             }
-            if (method_exists($this, $method)) {
-                $this->frontEndFields[$key]['value'] = $this->{$method}($key);
-            }
         }
         WC()->session->set($this->prefix, $this->frontEndFields);
+    }
+    
+    /**
+     * Получить ИНН для пользователя
+     *
+     * @param bool $key не используется
+     *
+     * @return bool|int 
+     */
+    private function _prefillValueinn($key=false)
+    {
+        if (!is_user_logged_in()) {
+            return false;
+        }
+        $uid=get_current_user_id();
+        return get_user_meta($uid, $this->prefix.'inn', true);
     }
     
     /**
@@ -500,6 +518,10 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         if ($required) {
             $out .= ' <span class="required">*</span>';
         }
+        $prefillmethod='_prefillValue'.$field['name'];
+        if (method_exists($this, $prefillmethod) && $this->{$prefillmethod}()) {
+            $field['value']=$this->{$prefillmethod}();
+        }
         if (! isset($field['value'])) {
             $field['value'] = '';
         }
@@ -521,5 +543,22 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         $out .= '</label>';
             
         return $out;
+    }
+    
+    /**
+     * Присваиваем пользователю через мета
+     * ИНН, если он залогинен
+     *
+     * @param int $inn ИНН
+     *
+     * @return void
+     */
+    private function _assignINNToUser(int $inn)
+    {
+        if (!is_user_logged_in()) {
+            return;
+        }
+        $uid=get_current_user_id();
+        update_user_meta($uid, $this->prefix.'inn', $inn);
     }
 }

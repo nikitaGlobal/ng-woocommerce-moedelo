@@ -267,7 +267,7 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
     private function _orderItemGetValue($product, $fieldid)
     {
         $productid = $product->get_product_id();
-                $value = get_post_meta(
+        $value = get_post_meta(
                     $productid,
                     $this->prefix . $fieldid,
                     true

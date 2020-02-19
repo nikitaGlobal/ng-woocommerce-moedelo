@@ -88,28 +88,17 @@ if (! class_exists("NGWMD")) {
         private function _metaboxProduct()
         {
             //$this->_metaboxProduct();
-            $this->_metaboxFields=array(
-                'type'=>array(
-                    'id'=>$this->prefix.'type',
-                    'type'=>'select',
-                    'label'=>__('Product type for moedelo.org', $this->prefix),
-                    'options'=>array(
-                        '1'=>__('Product', $this->prefix),
-                        '2'=>__('Service', $this->prefix)
-                    ),
+            $this->_metaboxFields=self::settingsItemFieldValues();
+            foreach ($this->_metaboxFields as $k=>$v) {
+                $this->_metaboxFields[$k]=array_merge(
+                    $v,
+                    array(
+                    'id'=>$this->prefix.$k,
+                    'label'=>$v['title'],
                     'tab'=>'moedelo.org'
-                ),
-                'units'=>array(
-                    'id'=>$this->prefix.'units',
-                    'type'=>'text',
-                    'label'=>__('Product units', $this->prefix),
-                    'tab'=>'moedelo.org'
-                ),
-                'NdsType'=>array(
-                    'id'=>$this->prefix.'NdsType',
-                    
-                )
-            );
+                    )
+                );
+            }
             add_filter(
                 'woocommerce_product_data_tabs',
                 array($this,'productTabs')
@@ -171,12 +160,48 @@ if (! class_exists("NGWMD")) {
                  .'woocommerce_options_panel hidden">';
                 foreach ($fields as $field) {
                     $methodname='_makeMetabox'.$field['type'];
+                    $value=$this->_makeMetaboxFieldValue($field);
+                    $field['value']=$value;
                     $this->{$methodname}($field);
                 }
                 echo '</div>';
             }
         }
     
+        /**
+         * Проставляем значение поля
+         * либо из записи,
+         * либо из настроек,
+         * либо по умолчанию
+         * для настроек
+         *
+         * @param array $field поле
+         *
+         * @return mixed
+         */
+        private function _makeMetaboxFieldValue($field)
+        {
+            $value=get_post_meta(get_the_ID(), $field['id'], true);
+            if (metadata_exists('post', get_the_ID(), $field['id'])) {
+                return $value;
+            }
+            $settingsKey=str_replace(
+                $this->prefix.'product',
+                'product',
+                $field['id']
+            );
+
+                
+            if (isset($this->settings[$settingsKey])) {
+                return $this->settings[$settingsKey];
+            } else {
+                return $field['default'];
+            }
+                
+            
+            return $value;
+        }
+        
         /**
          * Make select field for product metabox
          *
@@ -190,7 +215,7 @@ if (! class_exists("NGWMD")) {
                 array
                 (
                 'id'          => $field['id'],
-                'value'       => get_post_meta(get_the_ID(), $field['id'], true),
+                'value'=>$field['value'],
                 'wrapper_class' => isset(
                     $field['wrapper_class']
                 ) ? $field['wrapper_class'] : '',
@@ -212,7 +237,7 @@ if (! class_exists("NGWMD")) {
             woocommerce_wp_text_input(
                 array(
                 'id'=>$field['id'],
-                'value'       => get_post_meta(get_the_ID(), $field['id'], true),
+                'value'       => $field['value'],
                 'wrapper_class' => isset(
                     $field['wrapper_class']
                 ) ? $field['wrapper_class'] : '',
@@ -357,11 +382,20 @@ if (! class_exists("NGWMD")) {
             }
             set_transient($trans, true, 60*5);
         }
-   
-        public static function settingsItemFieldValues($field)
+    
+        /**
+         * Здесь поля для товаров,
+         * для которых также
+         * задаются настройки по умолчанию
+         *
+         * @param bool $field не используется
+         *
+         * @return array значения
+         */
+        public static function settingsItemFieldValues($field=false)
         {
             $fields=array(
-                'NdsPositionType'=>array(
+/*                'productNdsPositionType'=>array(
                     'title'=>__('VAT', self::prefix()),
                     'type'=>'select',
                     'default'=>'1',
@@ -371,7 +405,7 @@ if (! class_exists("NGWMD")) {
                         '3'=>__('Include', self::prefix())
                     )
                 ),
-                'defaultProductNdsType'=>array(
+                'productNdsType'=>array(
                     'title'=>__('Default VAT rate', self::prefix()),
                     'type'=>'select',
                     'default'=>'1',
@@ -380,30 +414,26 @@ if (! class_exists("NGWMD")) {
                         '0'=>__('VAT 0%', self::prefix()),
                         '18'=>__('VAT 18%', self::prefix())
                     ),
-                )
+                ),*/
+                'productType'  => array(
+                    'title'   => __('Default item type is', self::prefix()),
+                    'type'    => 'select',
+                    'options' => array(
+                        '1' => 'product',
+                        '2' => 'service'
+                    ),
+                    'default' => 1
+                ),
+                'productUnit' => array(
+                    'title'   => __('Default item units are', self::prefix()),
+                    'type'    => 'text',
+                    'default' => 'pcs'
+                ),
             );
+            if (!$field) {
+                return $fields;
+            }
             return $fields[$field];
-        }
-        
-        /**
-         * Для логов - часть вывода к
-         * ласса и метода/функции
-         *
-         * @param object $debug debug_backtrace
-         *
-         * @return string
-         */
-        private static function _logString($debug)
-        {
-            $out = implode(
-                '', array(
-                    $debug['class'],
-                    $debug['type'],
-                    $debug['function']
-                )
-            );
-        
-            return $out;
         }
     }
 }

@@ -36,7 +36,7 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             $this->prefix
         );
         $this->supports           = array(
-            'products'
+        'products'
         );
         $this->init_form_fields();
         $this->init_settings();
@@ -49,18 +49,18 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         );
         //add_action('wp_enqueue_scripts', array($this, 'payment_scripts'));
         $this->frontEndFields = array(
-            'inn' => array(
+        'inn' => array(
+            'type'     => 'text',
+            'name'     => 'inn',
+            'label'    => __('Your company INN', $this->prefix),
+            'required' => true
+        ),
+        /*    'company' => array(
                 'type'     => 'text',
-                'name'     => 'inn',
-                'label'    => __('Your company INN', $this->prefix),
-                'required' => true
-            ),
-            /*    'company' => array(
-                    'type'     => 'text',
-                    'name'     => 'company',
-                    'label'    => __('Company name', $this->prefix),
-                    'disabled' => true
-                )*/
+                'name'     => 'company',
+                'label'    => __('Company name', $this->prefix),
+                'disabled' => true
+            )*/
         );
         $this->_prefillValues();
     }
@@ -73,81 +73,75 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
     public function init_form_fields()
     {
         $this->form_fields = array(
-            'enabled'             => array(
-                'title'   => __('Enable/Disable', 'woocommerce'),
-                'type'    => 'checkbox',
-                'label'   => __('Enable Cheque Payment', 'woocommerce'),
-                'default' => 'no'
+        'enabled'             => array(
+            'title'   => __('Enable/Disable', 'woocommerce'),
+            'type'    => 'checkbox',
+            'label'   => __('Enable Cheque Payment', 'woocommerce'),
+            'default' => 'no'
+        ),
+        'title'               => array(
+            'title'       => __('Title', 'woocommerce'),
+            'type'        => 'text',
+            'description' => __(
+                'This controls the title which the user sees during checkout.',
+                'woocommerce'
             ),
-            'title'               => array(
-                'title'       => __('Title', 'woocommerce'),
-                'type'        => 'text',
-                'description' => __(
-                    'This controls the title which the user sees during checkout.',
-                    'woocommerce'
-                ),
-                'default'     => __('Invoice for bank transfer', $this->prefix),
-                'desc_tip'    => true,
-            ),
-            'invoiceType'=>array(
-                'title'=>__('Invoice type', $this->prefix),
-                'type'=>'select',
-                'default'=>'1',
-                'options'=>array(
-                    '1'=>__('Simple', $this->prefix),
-                    '2'=>__("Contract", $this->prefix)
-                )
-            ),
-            'NdsPositionType'=>NGWMD::settingsItemFieldValues(
-                'NdsPositionType'
-            ),
-            'defaultProductNdsType'=>NGWMD::settingsItemFieldValues(
-                'defaultProductNdsType'
-            ),
-            'description'         => array(
-                'title'   => __('Customer Message', 'woocommerce'),
-                'type'    => 'textarea',
-                'default' => ''
-            ),
-            'invoiceUnpaid'       => array(
-                'title'   => __('Order status after bill is issued'),
-                'type'    => 'select',
-                'options' => $this->_getOrderStatuses()
-            ),
-            'invoicePaid'         => array(
-                'title'   => __('Order status after bill is paid'),
-                'type'    => 'select',
-                'options' => $this->_getOrderStatuses()
-            ),
-            'defaultProducttype'  => array(
-                'title'   => __('Default item type is', $this->prefix),
-                'type'    => 'select',
-                'options' => array(
-                    '1' => 'product',
-                    '2' => 'service'
-                ),
-                'default' => 1
-            ),
-            'defaultProductunits' => array(
-                'title'   => __('Default item units are', $this->prefix),
-                'type'    => 'text',
-                'default' => 'pcs'
-            ),
-            'checkCovered'        => array(
-                'title'       => __('Check if bill is covered', $this->prefix),
-                'description' => __(
-                    'Will check every 5 minutes via moedelo API if bill is covered'
-                ),
-                'type'        => 'checkbox',
-                'default'     => 'no'
-            ),
-            'apikey'              => array(
-                'title'       => __('moedelo.org api key'),
-                'type'        => 'text',
-                'description' => __(
-                    'Can be found in moedelo.org dashboard -> partners\' integration'
-                )
+            'default'     => __('Invoice for bank transfer', $this->prefix),
+            'desc_tip'    => true,
+        ),
+        'invoiceType'=>array(
+            'title'=>__('Invoice type', $this->prefix),
+            'type'=>'select',
+            'default'=>'1',
+            'options'=>array(
+                '1'=>__('Simple', $this->prefix),
+                '2'=>__("Contract", $this->prefix)
             )
+        ),
+        'description'         => array(
+            'title'   => __('Customer Message', 'woocommerce'),
+            'type'    => 'textarea',
+            'default' => ''
+        ),
+        /*       'productNdsPositionType'=>array(
+            'title'=>__('VAT', $this->prefix),
+            'type'=>'select',
+            'default'=>'1',
+            'options'=>array(
+                '1'=>__('Do not implement', $this->prefix),
+                '2'=>__('Above', $this->prefix),
+                '3'=>__('Include', $this->prefix)
+            )
+        ),*/
+        'invoiceUnpaid'       => array(
+            'title'   => __('Order status after bill is issued'),
+            'type'    => 'select',
+            'options' => $this->_getOrderStatuses()
+        ),
+        'invoicePaid'         => array(
+            'title'   => __('Order status after bill is paid'),
+            'type'    => 'select',
+            'options' => $this->_getOrderStatuses()
+        ),
+        'checkCovered'        => array(
+            'title'       => __('Check if bill is covered', $this->prefix),
+            'description' => __(
+                'Will check every 5 minutes via moedelo API if bill is covered'
+            ),
+            'type'        => 'checkbox',
+            'default'     => 'no'
+        ),
+        'apikey'              => array(
+            'title'       => __('moedelo.org api key'),
+            'type'        => 'text',
+            'description' => __(
+                'Can be found in moedelo.org dashboard -> partners\' integration'
+            )
+        )
+        );
+        $this->form_fields=array_merge(
+            $this->form_fields,
+            NGWMD::settingsItemFieldValues()
         );
     }
     
@@ -164,9 +158,9 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             echo wpautop(wp_kses_post($this->description));
         }
         echo '<fieldset id="wc-' .
-             esc_attr($this->id) .
-             '-cc-form" class="wc-credit-card-form wc-payment-form" '.
-             'style="background:transparent;">';
+         esc_attr($this->id) .
+         '-cc-form" class="wc-credit-card-form wc-payment-form" '.
+         'style="background:transparent;">';
         do_action('woocommerce_credit_card_form_start', $this->id);
         foreach ($this->frontEndFields as $field) {
             echo $this->_feMakeRow($this->_femakeField($field));
@@ -194,16 +188,16 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         //$fields=WC()->session->get($this->prefix);
             
         $bill = array(
-            'KontragentId'   => NGWMD::getCompanyByINN(
-                (int)$_POST[
-                $this->prefix . 'inn'
-                ]
-            ),
-            'AdditionalInfo' => __('Order #', $this->prefix) . $orderId,
-            'Sum'            => $order->get_total(),
-            'NdsPositionType'=> $this->get_option('NdsPositionType'),
-            'Type'           => $this->get_option('InvoiceType'),
-            'items'          => $this->_orderItems($order)
+        'KontragentId'   => NGWMD::getCompanyByINN(
+            (int)$_POST[
+            $this->prefix . 'inn'
+            ]
+        ),
+        'AdditionalInfo' => __('Order #', $this->prefix) . $orderId,
+        'Sum'            => $order->get_total(),
+        'NdsPositionType'=> $this->_getTaxSettings(),
+        'Type'           => $this->get_option('invoiceType'),
+        'items'          => $this->_orderItems($order)
         );
         $bill = NGWMD::postBill($bill);
         if (! isset($bill['Number']) || ! isset($bill['Online'])) {
@@ -229,15 +223,39 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             __(
                 'Invoice is available here :',
                 $this->prefix
-            ) . ' <a target="_blank" href="' . 'https://moedelo.org/' . $bill['Online'].'">moedelo.org'.
+            ) .
+            ' <a target="_blank" href="' .
+            'https://moedelo.org/' .
+            $bill['Online'].
+            '">moedelo.org'.
             '</a>'
         );
         $order->update_status($this->get_option('invoiceUnpaid'));
-            
         return array(
-            'result'   => 'success',
-            'redirect' => $this->get_return_url($order)
+        'result'   => 'success',
+        'redirect' => $this->get_return_url($order)
         );
+    }
+    
+    /**
+     * Получаем настройки
+     * налогообложения из
+     * woocommerce,
+     * задаем нужный параметр для API moedelo.org
+     *
+     * @return int
+     */
+    private function _getTaxSettings()
+    {
+        $taxes=get_option('woocommerce_calc_taxes');
+        if ($taxes!='yes') {
+            return 3;
+        }
+        $option=get_option('woocommerce_prices_include_tax');
+        if ($option=='yes') {
+            return 2;
+        }
+        return 2;
     }
     
     /**
@@ -253,22 +271,66 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         $items       = array();
         $order_items = $order->get_items(array('line_item', 'fee', 'shipping'));
         foreach ($order_items as $item_id => $order_item) {
-            $items[] = array(
-                'Name'  => $order_item->get_name(),
-                'Type'  => (string)$this->_orderItemGetValue(
-                    new
-                    WC_Order_Item_Product($item_id), 'type'
-                ),
-                'Count' => $order_item->get_quantity(),
-                'Price' => $order_item->get_total() / $order_item->get_quantity(),
-                'Unit'  => (string)$this->_orderItemGetValue(
-                    new
-                    WC_Order_Item_Product($item_id), 'units'
-                )
-            );
+            $items[]
+                = array_merge(
+                    array(
+                    'Name'  => $order_item->get_name(),
+                    'Type'  => (string)$this->_orderItemGetValue(
+                        new
+                        WC_Order_Item_Product($item_id), 'productType'
+                    ),
+                    //'DiscountRate'=>$order_item->get_discount_rate(),
+                    'Count' => $order_item->get_quantity(),
+                    'Price' => round(
+                        $order_item->get_total() /
+                        $order_item->get_quantity(), (int)get_option('woocommerce_price_num_decimals')
+                    ),
+                    'Unit'  => (string)$this->_orderItemGetValue(
+                        new
+                        WC_Order_Item_Product($item_id), 'productUnit'
+                    )
+                    ),
+                    $this->_orderItemsTaxation($order_item)
+                );
         }
-            
         return $items;
+    }
+    
+    /**
+     * Определение ставки НДС
+     * Для товарной позиции
+     *
+     * @param array $item позиция
+     *
+     * @return array
+     */
+    private function _orderItemsTaxation($item)
+    {
+        if ($this->_getTaxSettings() == 1) {
+            return array();
+        }
+        $out      = array();
+        $ndstypes = array(
+        '0'  => 0,
+        '20' => 0.20
+        );
+        $total    = round(
+            $item->get_total(),
+            (int)get_option('woocommerce_price_num_decimals')
+        );
+        $tax      = $item->get_taxes();
+        $taxkey='total';
+        if (array_shift(array_values($tax[$taxkey])) == 0) {
+            $out['NdsType'] = 0;
+        } else {
+            $out['NdsType'] = 20;
+        }
+        if ($this->_getTaxSettings()==3) {
+            $out['SumWithNds']=$total;
+        } else {
+            $out['SumWithoutNds']=$total;
+        }
+        return $out;
     }
     
     /**
@@ -282,17 +344,23 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
      */
     private function _orderItemGetValue($product, $fieldid)
     {
+        $metakey=$this->prefix . $fieldid;
         $productid = $product->get_product_id();
+        $default=$this->get_option($fieldid);
         $value = get_post_meta(
             $productid,
-            $this->prefix . $fieldid,
+            $metakey,
             true
         );
-        if (! $value) {
-            return $this->get_option('defaultProduct' . $fieldid);
+        if (! metadata_exists(
+            'post',
+            $productid,
+            $metakey
+        )
+        ) {
+            return $default;
         }
-            
-                return $value;
+        return $value;
     }
     
     /**

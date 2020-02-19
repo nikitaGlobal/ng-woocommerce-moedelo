@@ -104,6 +104,10 @@ if (! class_exists("NGWMD")) {
                     'type'=>'text',
                     'label'=>__('Product units', $this->prefix),
                     'tab'=>'moedelo.org'
+                ),
+                'NdsType'=>array(
+                    'id'=>$this->prefix.'NdsType',
+                    
                 )
             );
             add_filter(
@@ -354,6 +358,33 @@ if (! class_exists("NGWMD")) {
             set_transient($trans, true, 60*5);
         }
    
+        public static function settingsItemFieldValues($field)
+        {
+            $fields=array(
+                'NdsPositionType'=>array(
+                    'title'=>__('VAT', self::prefix()),
+                    'type'=>'select',
+                    'default'=>'1',
+                    'options'=>array(
+                        '1'=>__('Do not implement', self::prefix()),
+                        '2'=>__('Above', self::prefix()),
+                        '3'=>__('Include', self::prefix())
+                    )
+                ),
+                'defaultProductNdsType'=>array(
+                    'title'=>__('Default VAT rate', self::prefix()),
+                    'type'=>'select',
+                    'default'=>'1',
+                    'options'=>array(
+                        '1'=>__('No VAT', self::prefix()),
+                        '0'=>__('VAT 0%', self::prefix()),
+                        '18'=>__('VAT 18%', self::prefix())
+                    ),
+                )
+            );
+            return $fields[$field];
+        }
+        
         /**
          * Для логов - часть вывода к
          * ласса и метода/функции

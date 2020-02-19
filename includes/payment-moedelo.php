@@ -89,6 +89,21 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
                 'default'     => __('Invoice for bank transfer', $this->prefix),
                 'desc_tip'    => true,
             ),
+            'invoiceType'=>array(
+                'title'=>__('Invoice type', $this->prefix),
+                'type'=>'select',
+                'default'=>'1',
+                'options'=>array(
+                    '1'=>__('Simple', $this->prefix),
+                    '2'=>__("Contract", $this->prefix)
+                )
+            ),
+            'NdsPositionType'=>NGWMD::settingsItemFieldValues(
+                'NdsPositionType'
+            ),
+            'defaultProductNdsType'=>NGWMD::settingsItemFieldValues(
+                'defaultProductNdsType'
+            ),
             'description'         => array(
                 'title'   => __('Customer Message', 'woocommerce'),
                 'type'    => 'textarea',
@@ -186,7 +201,8 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             ),
             'AdditionalInfo' => __('Order #', $this->prefix) . $orderId,
             'Sum'            => $order->get_total(),
-            'Type'           => 1,//@Todo сделать вариант счета
+            'NdsPositionType'=> $this->get_option('NdsPositionType'),
+            'Type'           => $this->get_option('InvoiceType'),
             'items'          => $this->_orderItems($order)
         );
         $bill = NGWMD::postBill($bill);
@@ -268,13 +284,13 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
     {
         $productid = $product->get_product_id();
         $value = get_post_meta(
-                    $productid,
-                    $this->prefix . $fieldid,
-                    true
-                );
-                if (! $value) {
-                    return $this->get_option('defaultProduct' . $fieldid);
-                }
+            $productid,
+            $this->prefix . $fieldid,
+            true
+        );
+        if (! $value) {
+            return $this->get_option('defaultProduct' . $fieldid);
+        }
             
                 return $value;
     }

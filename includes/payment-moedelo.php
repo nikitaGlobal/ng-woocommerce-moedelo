@@ -470,7 +470,7 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
      *
      * @param bool $key не используется
      *
-     * @return bool|int 
+     * @return bool|int
      */
     private function _prefillValueinn($key=false)
     {

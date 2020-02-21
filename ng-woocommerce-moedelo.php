@@ -330,8 +330,8 @@ if (! class_exists("NGWMD")) {
          */
         public function trackPayments()
         {
-            if (!isset($this->settings['checkCovered']) 
-                || $this->settings['checkCovered']!='yes'
+            if (!isset($this->settings['checkPaid'])
+                || $this->settings['checkPaid']!='yes'
             ) {
                 
                 return;

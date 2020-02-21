@@ -123,7 +123,7 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             'type'    => 'select',
             'options' => $this->_getOrderStatuses()
         ),
-        'checkCovered'        => array(
+        'checkPaid'        => array(
             'title'       => __('Check if bill is covered', $this->prefix),
             'description' => __(
                 'Will check every 5 minutes via moedelo API if bill is covered'

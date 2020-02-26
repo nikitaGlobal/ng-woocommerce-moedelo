@@ -1,7 +1,7 @@
 <?php
     
     /**
-     * Class WC_Gateway_Moedelo
+     * Class NGWCMD_WC_Gateway_Moedelo
      *
      * PHP version 7.2
      *
@@ -11,10 +11,10 @@
      * @license  https://nikita.global commercial
      * @link     https://nikita.global
      * */
-class WC_Gateway_Moedelo extends WC_Payment_Gateway
+class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
 {
     /**
-     * WC_Gateway_Moedelo constructor.
+     * NGWCMD_WC_Gateway_Moedelo constructor.
      *
      * @category NikitaGlobal
      * @package  NikitaGlobal
@@ -49,18 +49,12 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         );
         //add_action('wp_enqueue_scripts', array($this, 'payment_scripts'));
         $this->frontEndFields = array(
-        'inn' => array(
+            'inn' => array(
             'type'     => 'text',
             'name'     => 'inn',
             'label'    => __('Your company INN', $this->prefix),
             'required' => true
-        ),
-        /*    'company' => array(
-                'type'     => 'text',
-                'name'     => 'company',
-                'label'    => __('Company name', $this->prefix),
-                'disabled' => true
-            )*/
+            )
         );
 
     }
@@ -103,16 +97,6 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             'type'    => 'textarea',
             'default' => ''
         ),
-        /*       'productNdsPositionType'=>array(
-            'title'=>__('VAT', $this->prefix),
-            'type'=>'select',
-            'default'=>'1',
-            'options'=>array(
-                '1'=>__('Do not implement', $this->prefix),
-                '2'=>__('Above', $this->prefix),
-                '3'=>__('Include', $this->prefix)
-            )
-        ),*/
         'invoiceUnpaid'       => array(
             'title'   => __('Order status after bill is issued'),
             'type'    => 'select',
@@ -186,9 +170,11 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
     {
         $order = wc_get_order($orderId);
         //$fields=WC()->session->get($this->prefix);
-        $inn= (int)$_POST[
-        $this->prefix . 'inn'
-        ];
+        $inn= (int)sanitize_text_field(
+            $_POST[
+            $this->prefix . 'inn'
+            ]
+        );
         $bill = array(
         'KontragentId'   => NGWMD::getCompanyByINN(
             $inn
@@ -394,7 +380,9 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
             }
             $method = '_validateField' . $field['name'];
             if (isset($_POST[$this->prefix.$field['name']])) {
-                $field['value'] =$_POST[$this->prefix.$field['name']];
+                $field['value'] =sanitize_text_field(
+                    $_POST[$this->prefix.$field['name']]
+                );
             }
             if (! method_exists($this, $method)) {
                 continue;
@@ -458,8 +446,10 @@ class WC_Gateway_Moedelo extends WC_Payment_Gateway
         foreach ($this->frontEndFields as $key => $field) {
             //  $method = '_prefillValue' . $field['name'];
             if (isset($_POST[$this->prefix . $field['name']])) {
-                $this->frontEndFields[$key]['value'] = $_POST[$this->prefix .
-                                                              $field['name']];
+                $this->frontEndFields[$key]['value'] = sanitize_text_field(
+                    $_POST[$this->prefix .
+                           $field['name']]
+                );
             }
         }
         WC()->session->set($this->prefix, $this->frontEndFields);

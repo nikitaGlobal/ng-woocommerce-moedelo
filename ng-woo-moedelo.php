@@ -6,7 +6,7 @@
      * Description: Integrates WooCommerce and moedelo.org
      * Author: Nikita Menshutin
      * Version: 1.0
-     * Text Domain: NGWMD
+     * Text Domain: ng-woo-moedelo-org-integration
      * Domain Path: languages
      *
      * PHP version 7.2

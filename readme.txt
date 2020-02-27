@@ -3,7 +3,7 @@ Contributors: nikitaglobal
 Plugin Name: NG-WooCommerce-MoeDelo
 Tags: woocommerce, moedelo, moedelo.org, payment-gateway
 Author: Nikita Menshutin
-Text Domain: ng-woo-moedelo
+Text Domain: ng-woo-moedelo-org-integration
 Domain Path: /languages
 Requires at least: 3.6
 Tested up to: 5.3.2

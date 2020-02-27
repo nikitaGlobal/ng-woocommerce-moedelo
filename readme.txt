@@ -15,7 +15,7 @@ License URI: 		http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Allow to issue invoices via [https://moedelo.org/](https://moedelo.org) cloud
+Allows to issue invoices via [https://moedelo.org/](https://moedelo.org) cloud
 accounting service.
 
 Checks customer tax number, creates customers, issues invoice, then tracks payments
@@ -26,6 +26,9 @@ via API.
 This plugin makes HTTP-requests to 3rd party service [moedelo.org API](https://www.moedelo.org/landingpage/openapi/api)
 to create customer, find existing customer by Tax Number (INN), issue invoice, check
 if invoice is paid
+
+= 1.1 (2020-02-27)
+* Localization issues
 
 = 1.0 (2020-02-21) =
 * The First Upload, but was tested before at several sites

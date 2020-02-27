@@ -5,7 +5,7 @@
      * Plugin URI: https://nikita.global
      * Description: Integrates WooCommerce and moedelo.org
      * Author: Nikita Menshutin
-     * Version: 1.0
+     * Version: 1.1
      * Text Domain: ng-woo-moedelo-org-integration
      * Domain Path: languages
      *
@@ -308,7 +308,7 @@ Class NGWMD
              **/
     public static function version()
     {
-        return '1.0';
+        return '1.1';
     }
     
     /**

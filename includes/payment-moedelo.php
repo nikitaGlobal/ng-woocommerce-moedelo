@@ -118,12 +118,12 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             'default' => ''
         ),
         'invoiceUnpaid'       => array(
-            'title'   => __('Order status after bill is issued'),
+            'title'   => __('Order status after bill is issued', $this->prefix),
             'type'    => 'select',
             'options' => $this->_getOrderStatuses()
         ),
         'invoicePaid'         => array(
-            'title'   => __('Order status after bill is paid'),
+            'title'   => __('Order status after bill is paid', $this->prefix),
             'type'    => 'select',
             'options' => $this->_getOrderStatuses()
         ),
@@ -136,10 +136,11 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             'default'     => 'no'
         ),
         'apikey'              => array(
-            'title'       => __('moedelo.org api key'),
+            'title'       => __('moedelo.org api key', $this->prefix),
             'type'        => 'text',
             'description' => __(
-                'Can be found in moedelo.org dashboard -> partners\' integration'
+                'Can be found in moedelo.org dashboard -> partners\' integration',
+                $this->prefix
             )
         )
         );
@@ -162,21 +163,13 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             echo wpautop(wp_kses_post($this->description));
         }
         do_action('woocommerce_moedelo_form_start', $this->id);
-        if (!wc_locate_template('checkout/moedelo.php')) {
-            echo '<fieldset id="wc-' .
-                esc_attr($this->id) .
-                '-cc-form" class="wc-moedelo-form wc-payment-form" ' .
-                'style="background:transparent;">';
-            foreach ($this->frontEndFields as $field) {
-                echo $this->_feMakeRow($this->_femakeField($field));
-            }
-            echo '<div class="clear"></div>';
-            echo '</fieldset>';
+        $args=array('fields'=>$this->frontEndFields);
+        if (!file_exists(wc_locate_template('checkout/moedelo.php'))) {
+            include(plugin_dir_path(__FILE__).'/moedelo.php');
         } else {
-            wc_get_template('checkout/moedelo.php', array('fields'=>$this->frontEndFields));
+            wc_get_template('checkout/moedelo.php', $args);
         }
         do_action('woocommerce_moedelo_form_end', $this->id);
-        echo '<div class="clear"></div></fieldset>';
     }
     
     /**

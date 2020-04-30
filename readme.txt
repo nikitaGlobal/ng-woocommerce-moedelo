@@ -9,7 +9,7 @@ Requires at least: 3.6
 Tested up to: 5.4.1
 Stable tag: 1.0
 Requires PHP: 5.6
-Version: 1.4
+Version: 1.5
 License: 			GPLv2 or later
 License URI: 		http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,9 @@ via API.
 This plugin makes HTTP-requests to 3rd party service [moedelo.org API](https://www.moedelo.org/landingpage/openapi/api)
 to create customer, find existing customer by Tax Number (INN), issue invoice, check
 if invoice is paid
+
+= 1.5 (2020-04-30)
+* Localization issues
 
 = 1.4 (2020-04-30)
 * Custom template available

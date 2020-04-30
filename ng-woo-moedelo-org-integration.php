@@ -5,7 +5,7 @@
      * Plugin URI: https://nikita.global
      * Description: Integrates WooCommerce and moedelo.org
      * Author: Nikita Menshutin
-     * Version: 1.1
+     * Version: 1.4
      * Text Domain: ng-woo-moedelo-org-integration
      * Domain Path: languages
      *
@@ -49,6 +49,7 @@ Class NGWMD
         );
         add_action('plugins_loaded', array($this, 'initPaymentMethod'));
         add_filter('woocommerce_payment_gateways', array($this, 'addMethod'));
+        add_filter($this->prefix.'invoiceurl', array($this, 'getInvoiceUrl'));
         $this->settings = self::settings();
         $this->_metaboxProduct();
         add_action('init', array($this, 'trackPayments'));
@@ -259,7 +260,7 @@ Class NGWMD
             if (!isset($_POST[$field['id']])) {
                 continue;
             }
-            $value=sanitize_text($_POST[$field['id']]);
+            $value=sanitize_text_field($_POST[$field['id']]);
             update_post_meta($id, $field['id'], $value);
         }
     }
@@ -308,7 +309,7 @@ Class NGWMD
              **/
     public static function version()
     {
-        return '1.1';
+        return '1.4';
     }
     
     /**
@@ -351,6 +352,15 @@ Class NGWMD
         foreach ($orders as $order) {
             $this->_trackPayment($order);
         }
+    }
+
+    public function getInvoiceUrl($orderid)
+    {
+        $billinfo=get_post_meta($orderid, $this->prefix, true);
+        if (!$billinfo) {
+            return false;
+        }
+        return 'https://moedelo.org/'.$billinfo['Online'];
     }
     
     /**

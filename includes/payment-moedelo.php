@@ -56,9 +56,29 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             'required' => true
             )
         );
-
+        $this->_prefillFields();
     }
-    
+
+    /**
+     * Заполняем поля чекаута значениями
+     *
+     * @return void
+     */
+    private function _prefillFields()
+    {
+        foreach ($this->frontEndFields as $key=>$field) {
+            $prefillmethod='_prefillValue'.$field['name'];
+            if (method_exists($this, $prefillmethod) && $this->{$prefillmethod}()) {
+                $field['value']=$this->{$prefillmethod}();
+            }
+            if (! isset($field['value'])) {
+                $field['value'] = '';
+            }
+            $field['id']=$this->prefix.crc32($field['label']);
+            $this->frontEndFields[$key]=$field;
+        }
+    }
+
     /**
      * Настройки платежа
      *
@@ -141,19 +161,21 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
         if ($this->description) {
             echo wpautop(wp_kses_post($this->description));
         }
-        echo '<fieldset id="wc-' .
-         esc_attr($this->id) .
-         '-cc-form" class="wc-credit-card-form wc-payment-form" '.
-         'style="background:transparent;">';
-        do_action('woocommerce_credit_card_form_start', $this->id);
-        foreach ($this->frontEndFields as $field) {
-            echo $this->_feMakeRow($this->_femakeField($field));
+        do_action('woocommerce_moedelo_form_start', $this->id);
+        if (!wc_locate_template('checkout/moedelo.php')) {
+            echo '<fieldset id="wc-' .
+                esc_attr($this->id) .
+                '-cc-form" class="wc-moedelo-form wc-payment-form" ' .
+                'style="background:transparent;">';
+            foreach ($this->frontEndFields as $field) {
+                echo $this->_feMakeRow($this->_femakeField($field));
+            }
+            echo '<div class="clear"></div>';
+            echo '</fieldset>';
+        } else {
+            wc_get_template('checkout/moedelo.php', array('fields'=>$this->frontEndFields));
         }
-        echo '<div class="clear"></div>';
-        echo '</fieldset>';
-        do_action('woocommerce_credit_card_form_end', $this->id);
-        echo '<div class="clear"></div></fieldset>';
-        do_action('woocommerce_credit_card_form_end', $this->id);
+        do_action('woocommerce_moedelo_form_end', $this->id);
         echo '<div class="clear"></div></fieldset>';
     }
     
@@ -206,7 +228,9 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
                 $this->prefix
             ) . ' ' . 'https://moedelo.org/' . $bill['Online']
         );
+        $note=$order->get_customer_note();
         $order->set_customer_note(
+            $note."\n".
             __(
                 'Invoice is available here :',
                 $this->prefix
@@ -507,13 +531,6 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
         }
         if ($required) {
             $out .= ' <span class="required">*</span>';
-        }
-        $prefillmethod='_prefillValue'.$field['name'];
-        if (method_exists($this, $prefillmethod) && $this->{$prefillmethod}()) {
-            $field['value']=$this->{$prefillmethod}();
-        }
-        if (! isset($field['value'])) {
-            $field['value'] = '';
         }
         if (! method_exists($this, $method)) {
             $out .= '<input type="' . $field['type'] . '" name="' .

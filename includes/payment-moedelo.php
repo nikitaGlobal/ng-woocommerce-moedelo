@@ -30,10 +30,10 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
         $this->version = NGWMD::version();
         //$this->icon='';
         $this->has_fields         = true;
-        $this->method_title       = __('Moedelo.org', $this->prefix);
+        $this->method_title       = __('Moedelo.org', NGWMD::textDomain());
         $this->method_description = __(
             'Invoicing via https://moedelo.org',
-            $this->prefix
+            NGWMD::textDomain()
         );
         $this->supports           = array(
         'products'
@@ -52,7 +52,7 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             'inn' => array(
             'type'     => 'text',
             'name'     => 'inn',
-            'label'    => __('Your company INN', $this->prefix),
+            'label'    => __('Your company INN', NGWMD::textDomain()),
             'required' => true
             )
         );
@@ -100,16 +100,16 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
                 'This controls the title which the user sees during checkout.',
                 'woocommerce'
             ),
-            'default'     => __('Invoice for bank transfer', $this->prefix),
+            'default'     => __('Invoice for bank transfer', NGWMD::textDomain()),
             'desc_tip'    => true,
         ),
         'invoiceType'=>array(
-            'title'=>__('Invoice type', $this->prefix),
+            'title'=>__('Invoice type', NGWMD::textDomain()),
             'type'=>'select',
             'default'=>'1',
             'options'=>array(
-                '1'=>__('Simple', $this->prefix),
-                '2'=>__("Contract", $this->prefix)
+                '1'=>__('Simple', NGWMD::textDomain()),
+                '2'=>__("Contract", NGWMD::textDomain())
             )
         ),
         'description'         => array(
@@ -118,17 +118,17 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             'default' => ''
         ),
         'invoiceUnpaid'       => array(
-            'title'   => __('Order status after bill is issued', $this->prefix),
+            'title'   => __('Order status after bill is issued', NGWMD::textDomain()),
             'type'    => 'select',
             'options' => $this->_getOrderStatuses()
         ),
         'invoicePaid'         => array(
-            'title'   => __('Order status after bill is paid', $this->prefix),
+            'title'   => __('Order status after bill is paid', NGWMD::textDomain()),
             'type'    => 'select',
             'options' => $this->_getOrderStatuses()
         ),
         'checkPaid'        => array(
-            'title'       => __('Check if bill is paid', $this->prefix),
+            'title'       => __('Check if bill is paid', NGWMD::textDomain()),
             'description' => __(
                 'Will check every 5 minutes via moedelo API if bill is covered'
             ),
@@ -136,11 +136,11 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             'default'     => 'no'
         ),
         'apikey'              => array(
-            'title'       => __('moedelo.org api key', $this->prefix),
+            'title'       => __('moedelo.org api key', NGWMD::textDomain()),
             'type'        => 'text',
             'description' => __(
                 'Can be found in moedelo.org dashboard -> partners\' integration',
-                $this->prefix
+                NGWMD::textDomain()
             )
         )
         );
@@ -149,7 +149,7 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             NGWMD::settingsItemFieldValues()
         );
     }
-    
+
     /**
      * Поля для оплаты
      * при оформлении заказа.
@@ -194,7 +194,7 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
         'KontragentId'   => NGWMD::getCompanyByINN(
             $inn
         ),
-        'AdditionalInfo' => __('Order #', $this->prefix) . $orderId,
+        'AdditionalInfo' => __('Order #', NGWMD::textDomain()) . $orderId,
         'Sum'            => $order->get_total(),
         'NdsPositionType'=> $this->_getTaxSettings(),
         'Type'           => $this->get_option('invoiceType'),
@@ -212,13 +212,13 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
         $order->add_order_note(
             __(
                 'Bill id',
-                $this->prefix
+                NGWMD::textDomain()
             ) . ' ' . $bill['Number'], true
         );
         $order->add_order_note(
             __(
                 'Invoice is available here :',
-                $this->prefix
+                NGWMD::textDomain()
             ) . ' ' . 'https://moedelo.org/' . $bill['Online']
         );
         $note=$order->get_customer_note();
@@ -226,7 +226,7 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
             $note."\n".
             __(
                 'Invoice is available here :',
-                $this->prefix
+                NGWMD::textDomain()
             ) .
             ' <a target="_blank" href="' .
             'https://moedelo.org/' .
@@ -381,7 +381,7 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
                 && $field['required']
                 && empty($_POST[$this->prefix . $field['name']])
             ) {
-                $field_name = __($field['label'], $this->prefix);
+                $field_name = __($field['label'], NGWMD::textDomain());
                 $field_key  = $this->prefix . $field['name'];
                 wc_add_notice(
                     sprintf(
@@ -438,7 +438,7 @@ class NGWCMD_WC_Gateway_Moedelo extends WC_Payment_Gateway
     {
         if (! NGWMD::isCompany($field['value'])) {
             wc_add_notice(
-                __('Please recheck INN', $this->prefix), 'error',
+                __('Please recheck INN', NGWMD::textDomain()), 'error',
                 array('id' => $this->prefix . $field['name'])
             );
                 

@@ -5,7 +5,7 @@
      * Plugin URI: https://nikita.global
      * Description: Integrates WooCommerce and moedelo.org
      * Author: Nikita Menshutin
-     * Version: 1.5
+     * Version: 1.5.1
      * Text Domain: ng-woo-moedelo-org-integration
      * Domain Path: languages
      *
@@ -40,13 +40,13 @@ Class NGWMD
         $this->prefix     = self::prefix();
         $this->version    = self::version();
         $this->methodname=self::methodname();
-        $this->pluginName = __('NG WooCommerce Moedelo.org integration');
+        $this->pluginName = __('NG WooCommerce Moedelo.org integration', self::textDomain());
         $this->options    = get_option($this->prefix);
-        load_plugin_textdomain(
-            $this->prefix,
+        /*load_plugin_textdomain(
+            self::textDomain(),
             false,
             $this->prefix . '/languages'
-        );
+        );*/
         add_action('plugins_loaded', array($this, 'initPaymentMethod'));
         add_filter('woocommerce_payment_gateways', array($this, 'addMethod'));
         add_filter($this->prefix.'invoiceurl', array($this, 'getInvoiceUrl'));
@@ -291,7 +291,12 @@ Class NGWMD
     {
         return get_option('woocommerce_' . self::prefix() . '_settings');
     }
-            
+
+    public static function textDomain()
+    {
+        return 'ng-woo-moedelo-org-integration';
+    }
+
     /**
              * Method returns prefix
              *
@@ -309,7 +314,7 @@ Class NGWMD
              **/
     public static function version()
     {
-        return '1.5';
+        return '1.5.1';
     }
     
     /**
@@ -392,7 +397,7 @@ Class NGWMD
         }
         set_transient($trans, true, 60*5);
     }
-    
+
     /**
          * Здесь поля для товаров,
          * для которых также
@@ -406,7 +411,7 @@ Class NGWMD
     {
         $fields=array(
                'productType'  => array(
-                'title'   => __('Default item type is', self::prefix()),
+                'title'   => __('Default item type is', self::textDomain()),
                 'type'    => 'select',
                 'options' => array(
                     '1' => 'product',
@@ -415,7 +420,7 @@ Class NGWMD
                 'default' => 1
                ),
                'productUnit' => array(
-                'title'   => __('Default item units are', self::prefix()),
+                'title'   => __('Default item units are', self::textDomain()),
                 'type'    => 'text',
                 'default' => 'pcs'
                ),

@@ -27,6 +27,9 @@ This plugin makes HTTP-requests to 3rd party service [moedelo.org API](https://w
 to create customer, find existing customer by Tax Number (INN), issue invoice, check
 if invoice is paid
 
+= 1.5.1 (2020-04-30)
+* Fixed crucial localization bug
+
 = 1.5 (2020-04-30)
 * Localization issues
 
